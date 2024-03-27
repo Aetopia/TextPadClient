@@ -7,7 +7,7 @@ class MainForm : Form
     public MainForm()
     {
         Text = "TextPad";
-Font = SystemFonts.MessageBoxFont;
+        Font = SystemFonts.MessageBoxFont;
 
         TableLayoutPanel tableLayoutPanel = new()
         {
@@ -22,6 +22,8 @@ Font = SystemFonts.MessageBoxFont;
         ToolStripButton toolStripButton1 = new() { Text = "New" },
                         toolStripButton2 = new() { Text = "Save" },
                         toolStripButton3 = new() { Text = "Open" };
+        toolStripButton3.Click += (sender, e) => new OpenForm().ShowDialog();
+
         menuStrip.Items.Add(toolStripButton1);
         menuStrip.Items.Add(toolStripButton2);
         menuStrip.Items.Add(toolStripButton3);
@@ -30,7 +32,7 @@ Font = SystemFonts.MessageBoxFont;
         {
             Multiline = true,
             Dock = DockStyle.Fill,
-            ScrollBars =ScrollBars.Both
+            ScrollBars = ScrollBars.Both
         };
         tableLayoutPanel.Controls.Add(textBox, 0, 1);
     }
