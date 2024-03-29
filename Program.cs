@@ -6,6 +6,6 @@ static class Program
     static void Main()
     {
         Application.EnableVisualStyles();
-        new MainForm().ShowDialog();
+      Console.WriteLine(new LoginForm().GetToken());
     }
 }

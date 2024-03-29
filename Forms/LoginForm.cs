@@ -2,10 +2,16 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Net.Http;
 using System.Collections.Generic;
+using System.Threading;
+using System;
+using System.Web;
+using System.Net;
+using System.Text;
 
 class LoginForm : Form
 {
-    public FormUrlEncodedContent Token = null;
+    readonly HttpClient httpClient = new();
+    string token = null;
 
     public LoginForm()
     {
@@ -14,6 +20,7 @@ class LoginForm : Form
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MinimizeBox = MaximizeBox = false;
         ClientSize = new(800 / 4, (int)(600 / 4.6));
+        CenterToScreen();
 
         TableLayoutPanel tableLayoutPanel = new() { Dock = DockStyle.Fill };
         Controls.Add(tableLayoutPanel);
@@ -50,36 +57,66 @@ class LoginForm : Form
             Text = "Login",
             Dock = DockStyle.Right
         };
-        button1.Click += (sender, e) =>
-        {
-            DialogResult = DialogResult.OK;
-            Close();
-        };
         statusBar.Controls.Add(button1);
-
         Button button2 = new()
         {
             Text = "Register",
             Dock = DockStyle.Left
         };
-        button2.Click += (sender, e) =>
-        {
-            DialogResult = DialogResult.Yes;
-            Close();
-        };
         statusBar.Controls.Add(button2);
 
-        FormClosed += (sender, e) =>
+        button1.Click += (sender, e) =>
         {
-            Token = new FormUrlEncodedContent(
-                new Dictionary<string, string>
-                {
-                    { "username", textBox1.Text },
-                    { "password", textBox2.Text }
-                });
+            button1.Enabled = button2.Enabled = false;
+            HttpResponseMessage httpResponseMessage = httpClient.PostAsync("http://localhost",
+                                                                            new FormUrlEncodedContent(
+                                                                            new Dictionary<string, string> {
+                                                                            { "action", "login" },
+                                                                            { "username", textBox1.Text.Trim() },
+                                                                            { "password", textBox2.Text } })
+                                                                            ).GetAwaiter().GetResult();
+            if (httpResponseMessage.StatusCode != HttpStatusCode.OK)
+                MessageBox.Show("Login failed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            else {
+                token = httpResponseMessage.Content.ReadAsStringAsync().Result;
+                Close();
+            }
+            button1.Enabled = button2.Enabled = true;
         };
 
-        CenterToScreen();
+        button2.Click += (sender, e) =>
+        {
+            new Thread(() =>
+            {
+                button1.Enabled = button2.Enabled = false;
+                HttpResponseMessage httpResponseMessage = httpClient.PostAsync("http://localhost",
+                                                                                new FormUrlEncodedContent(
+                                                                                new Dictionary<string, string> {
+                                                                                { "action", "register" },
+                                                                                { "username", textBox1.Text.Trim() },
+                                                                                { "password", textBox2.Text } })
+                                                                                ).GetAwaiter().GetResult();
+                switch (httpResponseMessage.StatusCode)
+                {
+                    case HttpStatusCode.Forbidden:
+                        MessageBox.Show(@"Account already exists.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        break;
+                    case HttpStatusCode.BadRequest:
+                        MessageBox.Show(@"Account couldn't be created.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        break;
+                    case HttpStatusCode.Created:
+                        MessageBox.Show(@"Account created.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        break;
+                }
+
+                button1.Enabled = button2.Enabled = true;
+            }).Start();
+        };
+    }
+
+    public string GetToken()
+    {
         ShowDialog();
+        return token;
     }
 }
