@@ -1,9 +1,10 @@
 using System.Drawing;
 using System.Windows.Forms;
+using System.Net.Http;
 
 class OpenForm : Form
 {
-    public OpenForm()
+    public OpenForm(HttpClient httpClient)
     {
         Text = "Open";
         Font = SystemFonts.MessageBoxFont;
@@ -13,7 +14,6 @@ class OpenForm : Form
 
         TableLayoutPanel tableLayoutPanel = new() { Dock = DockStyle.Fill, CellBorderStyle = TableLayoutPanelCellBorderStyle.Single };
         Controls.Add(tableLayoutPanel);
-
 
         ListBox listBox = new()
         {

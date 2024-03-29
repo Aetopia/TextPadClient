@@ -1,10 +1,11 @@
 using System;
 using System.Drawing;
+using System.Net.Http;
 using System.Windows.Forms;
 
 class MainForm : Form
 {
-    public MainForm()
+    public MainForm(HttpClient httpClient, string token)
     {
         Text = "TextPad";
         Font = SystemFonts.MessageBoxFont;
@@ -22,7 +23,7 @@ class MainForm : Form
         ToolStripButton toolStripButton1 = new() { Text = "New" },
                         toolStripButton2 = new() { Text = "Save" },
                         toolStripButton3 = new() { Text = "Open" };
-        toolStripButton3.Click += (sender, e) => new OpenForm().ShowDialog();
+        toolStripButton3.Click += (sender, e) => new OpenForm(httpClient).ShowDialog();
 
         menuStrip.Items.Add(toolStripButton1);
         menuStrip.Items.Add(toolStripButton2);

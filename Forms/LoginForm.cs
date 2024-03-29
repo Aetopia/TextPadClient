@@ -10,10 +10,9 @@ using System.Text;
 
 class LoginForm : Form
 {
-    readonly HttpClient httpClient = new();
     string token = null;
 
-    public LoginForm()
+    public LoginForm(HttpClient httpClient)
     {
         Text = "Login";
         Font = SystemFonts.MessageBoxFont;
@@ -79,6 +78,7 @@ class LoginForm : Form
                 MessageBox.Show("Login failed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             else {
                 token = httpResponseMessage.Content.ReadAsStringAsync().Result;
+                httpClient.Dispose();
                 Close();
             }
             button1.Enabled = button2.Enabled = true;
@@ -96,6 +96,7 @@ class LoginForm : Form
                                                                                 { "username", textBox1.Text.Trim() },
                                                                                 { "password", textBox2.Text } })
                                                                                 ).GetAwaiter().GetResult();
+
                 switch (httpResponseMessage.StatusCode)
                 {
                     case HttpStatusCode.Forbidden:
